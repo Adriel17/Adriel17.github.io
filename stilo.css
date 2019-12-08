@@ -1,0 +1,224 @@
+*{font-family: 'Josefin Sans', sans-serif;}
+
+body{
+background-color: black;
+}
+
+#cabeçalho{
+width: auto;
+height: 100px;
+background-color: orange;
+box-sizing: border-box;
+color: black;
+vertical-align: bottom;
+}
+
+#a1{	
+float: left;
+}
+
+.lis{
+padding-top: 5px;
+padding-bottom: 5px;
+padding-left: 5px;
+padding-right: 5px;
+display: inline-flex;
+position: absolute;
+float: right;
+margin-right: 5px;
+width: 150px;
+min-width: 150px;
+text-align: center;
+position: relative;
+border-style: solid;
+font-size: 20px;
+color: black;
+border-radius: 15px;
+transition: 0.5s;
+}
+
+.lis:hover{
+box-sizing: border-box;
+background-color: white;
+border-color: black;
+color: black;
+width: 200px;
+}
+
+#tit{		
+list-style: none;
+position: relative;
+right: 16px;
+bottom: 20px;
+top: 60px;
+color: orange;}
+
+#titulo{
+font-size: 40px;
+position: absolute;
+left: 110px;
+top: 50px;
+margin: 0px;
+
+}
+
+a{
+text-decoration: none;
+}
+
+section{	
+color: white;
+text-align: justify;
+margin-left: 200px;
+margin-right: 200px;;
+font-size: 25px;
+}
+
+footer{
+margin-left: 0px;
+margin-right: 0px;
+margin-bottom: 5px;
+bottom: 0px;
+top: 1000px;
+background-color: orange;
+position: relative;
+height: 100px;
+width: auto;
+
+}
+
+.pe{
+box-sizing: border-box;
+height: 30px;
+width: auto;
+float:left;
+position: relative;
+bottom: 0px;
+margin-right: 8px;
+margin-left: 8px;
+border-left: 2px solid black;
+border-right: 2px solid black;
+font-size: 20px;
+text-align: center;
+color: black;
+}
+.pe:hover{
+background-color: black;
+color: orange
+}
+
+#logomeio {
+display: block;
+margin-left: auto;
+margin-right: auto;
+}
+
+
+.input{
+position: absolute;
+left: 500px;
+background-color: orange;
+border-color: darkorange;
+width: 300px;
+font-size: 20px;
+padding-left: 3px;
+}
+#botao{
+display: block;
+position: absolute;
+width: 100px;
+height: 30px;
+margin-top: 40px;
+background-color: black;
+border: 2px solid orange;
+border-radius: 10px;
+color: white;
+
+}
+
+#par{
+	color: white;
+	font-size: 50px;
+	position: absolute;
+	vertical-align: bottom;
+	top: 1050px;
+	left: 440px;
+	visibility: hidden;
+}
+
+#ratinho{
+	position: absolute;
+	right: auto; 
+	left: 200px;
+	top: 750px;
+	visibility: hidden;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media only screen and (min-width: 320px) and (max-width: 768px){
+	#titulo {
+
+	}
+	#cabeçalho {
+		height: 200px;
+	}
+	section {
+		clear: both;
+		margin-left: 0px;
+		margin-right: 0px;
+	}
+	#tit {
+		padding-left: 0px;
+		position: absolute;
+		padding-top: 40px;
+		padding-left: 30px;
+	}
+	.lis {
+		padding-top: 5px;
+		padding-bottom: 5px;
+		padding-left: 5px;
+		padding-right: 5px;
+		display: ;
+		position: relative;
+		float: none;
+		margin-right: 5px;
+		width: 120px;
+		min-width: 120px;
+		text-align: center;
+		position: relative;
+		border-style: solid;
+		font-size: 20px;
+		color: black;
+		border-radius: 15px;
+		transition: 0.5s;
+	}
+	footer {
+		top: 50px;
+		height: 200px;
+	}
+	.image{
+		line-break:auto;
+		
+	}
+	.fff{
+		margin-left: auto;
+		margin-right: auto;
+
+	}
+}
