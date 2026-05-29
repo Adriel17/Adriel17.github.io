@@ -1,0 +1,196 @@
+<html>
+
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap" rel="stylesheet">
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+	<meta charset="utf-8">
+	<title>HUB de Ferramentas</title>
+	<link rel="stylesheet" href="./adminlte/plugins/fontawesome-free/css/all.min.css">
+	<link rel="stylesheet" type="text/css" href="./stylesheet/hub-style.css">
+	<link rel="stylesheet" type="text/css" href="./adminlte/dist/css/adminlte.min.css">
+</head>
+
+<body class="">
+	<!-- Navbar -->
+	<nav class="ml-0 main-header navbar navbar-expand navbar-primary navbar-light">
+		<!-- Brand Logo -->
+		<a href="index.html" class="brand-link" style="padding: 0.5rem; background-color: transparent;">
+			<img src="./resources/logotipo.png" alt="Logo" class="brand-image" style="opacity: .8; max-height: 40px;">
+		</a>
+
+		<!-- Left navbar links -->
+		<ul class="navbar-nav">
+			<li class="nav-item d-none d-sm-inline-block">
+				<a href="index.html" class="nav-link">Início</a>
+			</li>
+		</ul>
+		
+		<!-- Right navbar links -->
+		<ul class="navbar-nav ml-auto">
+			<li class="nav-item">
+				<a class="nav-link" id="btn-dark-mode" href="#" role="button" title="Alternar modo escuro">
+					<i class="fas fa-moon"></i>
+				</a>
+			</li>
+		</ul>
+	</nav>
+	<!-- /.navbar -->
+
+	<!-- Content -->
+	<div class="content-wrapper" style="margin-left: 0;">
+		<!-- Content Header -->
+		<div class="content-header">
+			<div class="container">
+				<div class="row mb-2">
+					<div class="col-sm-12">
+						<h1 class="m-0">HUB de Ferramentas</h1>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /.content-header -->
+
+		<!-- Main content -->
+		<section class="content">
+			<div class="container">
+				<!-- Small boxes (Stat box) -->
+				<div class="row">
+					<div class="col-lg-3 col-6">
+						<!-- small box -->
+						<div class="small-box bg-danger">
+							<div class="inner">
+								<h3>SQL</h3>
+								<p>Converte SQL para maiusculo</p>
+							</div>
+							<div class="icon">
+								<i class="fas fa-text-height"></i>
+							</div>
+							<a href="#" class="small-box-footer" data-toggle="modal" data-target="#modal-sql">Acessar <i class="fas fa-arrow-circle-right"></i></a>
+						</div>
+					</div>
+					<!-- ./col -->
+				</div>
+				<!-- /.row -->
+			</div>
+		</section>
+		<!-- /.content -->
+	</div>
+	<!-- /.content-wrapper -->
+
+	<!-- Modals -->
+	<div class="modal fade" id="modal-sql">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header bg-danger">
+					<h4 class="modal-title">Conversor SQL para Maiúsculo</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+				<div class="row">
+					<div class="col-md-6">
+						<label for="sql-input">SQL de Entrada:</label>
+						<textarea class="form-control" id="sql-input" rows="15" placeholder="Cole seu SQL aqui..."></textarea>
+					</div>
+					<div class="col-md-6" style="border-left: 2px solid #dee2e6; padding-left: 15px;">
+					<label for="sql-output">SQL em Maiúsculo:</label>
+					<textarea class="form-control" id="sql-output" rows="15" placeholder="Resultado aparecerá aqui..." readonly></textarea>
+					</div>
+				</div>
+				</div>
+				<div class="modal-footer justify-content-between">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+				<button type="button" class="btn btn-danger" id="btn-copiar-sql">
+					<i class="fas fa-copy"></i> Copiar para Área de Transferência
+				</button>
+			</div>
+	</div>
+	<!-- /.modals -->
+
+	<script src="adminlte/plugins/jquery/jquery.min.js"></script>
+	<script src="adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="adminlte/dist/js/adminlte.min.js"></script>
+	<script src="./javascript/sql-converter.js"></script>
+	
+	<script>
+		// Conversor SQL para maiúsculo
+		const sqlConverter = new SqlKeywordUppercaser();
+		
+		// Função para converter SQL
+		function converterSQL() {
+			var sqlInput = $('#sql-input').val();
+			try {
+				var sqlOutput = sqlConverter.convert(sqlInput);
+				$('#sql-output').val(sqlOutput);
+			} catch (error) {
+				$('#sql-output').val('Erro: ' + error.message);
+			}
+		}
+		
+		// Converter automaticamente quando o texto mudar
+		$('#sql-input').on('input change', function() {
+			converterSQL();
+		});
+		
+		// Copiar SQL para área de transferência
+		$('#btn-copiar-sql').on('click', function() {
+			var sqlOutput = $('#sql-output').val();
+			
+			if (!sqlOutput) {
+				alert('Não há conteúdo para copiar!');
+				return;
+			}
+			
+			navigator.clipboard.writeText(sqlOutput).then(function() {
+				// Feedback visual
+				var btn = $('#btn-copiar-sql');
+				var originalHtml = btn.html();
+				btn.html('<i class="fas fa-check"></i> Copiado!');
+				btn.removeClass('btn-danger').addClass('btn-success');
+				
+				setTimeout(function() {
+					btn.html(originalHtml);
+					btn.removeClass('btn-success').addClass('btn-danger');
+				}, 2000);
+			}).catch(function(err) {
+				alert('Erro ao copiar: ' + err);
+			});
+		});
+		
+		// Toggle Dark Mode
+		$(document).ready(function() {
+			// Verificar preferência salva
+			if (localStorage.getItem('darkMode') === 'enabled') {
+				enableDarkMode();
+			}
+			
+			$('#btn-dark-mode').on('click', function(e) {
+				e.preventDefault();
+				if ($('body').hasClass('dark-mode')) {
+					disableDarkMode();
+				} else {
+					enableDarkMode();
+				}
+			});
+		});
+		
+		function enableDarkMode() {
+			$('body').addClass('dark-mode');
+			$('.main-header').removeClass('navbar-light').addClass('navbar-dark');
+			$('.content-wrapper').css('background-color', '#343a40');
+			$('#btn-dark-mode i').removeClass('fa-moon').addClass('fa-sun');
+			localStorage.setItem('darkMode', 'enabled');
+		}
+		
+		function disableDarkMode() {
+			$('body').removeClass('dark-mode');
+			$('.main-header').removeClass('navbar-dark').addClass('navbar-light');
+			$('.content-wrapper').css('background-color', '');
+			$('#btn-dark-mode i').removeClass('fa-sun').addClass('fa-moon');
+			localStorage.setItem('darkMode', 'disabled');
+		}
+	</script>
+</body>
+
+</html>
