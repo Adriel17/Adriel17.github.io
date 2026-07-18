@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Férias</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --vacation: #22c55e;
+    --vacation-light: #dcfce7;
+    --owed: #f97316;
+    --owed-light: #ffedd5;
+    --return: #6366f1;
+    --return-light: #e0e7ff;
+    --start: #0ea5e9;
+    --start-light: #e0f2fe;
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card2: #263347;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --border: #334155;
+    --accent: #38bdf8;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #38bdf8, #22c55e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .page-header p {
+    color: var(--muted);
+    margin-top: 6px;
+    font-size: .95rem;
+  }
+
+  .layout {
+    display: flex;
+    gap: 24px;
+    max-width: 960px;
+    margin: 0 auto;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  /* ── PANEL ESQUERDO ── */
+  .panel-left {
+    flex: 0 0 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+  }
+
+  .card h2 {
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .field label { font-size: .85rem; color: var(--muted); font-weight: 600; }
+
+  .field input[type="date"],
+  .field input[type="number"] {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 1rem;
+    width: 100%;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .field input[type="number"] { -moz-appearance: textfield; }
+  .field input[type="number"]::-webkit-inner-spin-button { display: none; }
+
+  .field .hint {
+    font-size: .75rem;
+    color: var(--muted);
+  }
+
+  .btn-calc {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity .2s, transform .1s;
+    letter-spacing: .03em;
+  }
+  .btn-calc:hover { opacity: .88; }
+  .btn-calc:active { transform: scale(.98); }
+
+  /* ── LEGEND ── */
+  .legend { display: flex; flex-direction: column; gap: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--muted); }
+  .dot {
+    width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0;
+  }
+
+  /* ── RESULT CARDS ── */
+  .result-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .rcard {
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .rcard .rc-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; opacity: .7; }
+  .rcard .rc-value { font-size: 1.05rem; font-weight: 800; }
+  .rcard .rc-sub { font-size: .75rem; opacity: .65; }
+  .rcard.green  { background: var(--vacation-light); color: #166534; }
+  .rcard.orange { background: var(--owed-light);     color: #9a3412; }
+  .rcard.indigo { background: var(--return-light);   color: #3730a3; }
+  .rcard.sky    { background: var(--start-light);    color: #075985; }
+
+  /* ── PAINEL DIREITO ── */
+  .panel-right { flex: 1 1 400px; }
+
+  .calendar-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .cal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .cal-nav button {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    width: 34px; height: 34px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .cal-nav button:hover { background: var(--border); }
+  .cal-nav .cal-title { font-weight: 700; font-size: 1rem; }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .cal-dow {
+    text-align: center;
+    font-size: .7rem;
+    font-weight: 700;
+    color: var(--muted);
+    padding-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: .85rem;
+    font-weight: 500;
+    cursor: default;
+    transition: background .15s;
+    position: relative;
+  }
+  .cal-day.empty { background: transparent; }
+  .cal-day.today { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .cal-day.normal { color: var(--muted); }
+  .cal-day.normal:hover { background: var(--card2); }
+
+  /* vacation range */
+  .cal-day.vac-start {
+    background: var(--start);
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 800;
+  }
+  .cal-day.vac-mid {
+    background: var(--vacation);
+    color: #fff;
+    border-radius: 4px;
+  }
+  .cal-day.vac-end {
+    background: var(--vacation);
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 800;
+    outline: 3px solid #16a34a;
+    outline-offset: -3px;
+  }
+  /* owed days  */
+  .cal-day.owed-mid {
+    background: var(--owed);
+    color: #fff;
+    border-radius: 4px;
+  }
+  .cal-day.owed-end {
+    background: var(--owed);
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 800;
+    outline: 3px solid #c2410c;
+    outline-offset: -3px;
+  }
+  /* return day */
+  .cal-day.return-day {
+    background: var(--return);
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 800;
+    box-shadow: 0 0 0 3px rgba(99,102,241,.45);
+  }
+
+  /* tooltip badge */
+  .cal-day[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: #fff;
+    font-size: .65rem;
+    white-space: nowrap;
+    padding: 3px 7px;
+    border-radius: 6px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s;
+    z-index: 10;
+    border: 1px solid var(--border);
+  }
+  .cal-day[data-tip]:hover::after { opacity: 1; }
+
+  .results-hidden { display: none; }
+
+  @media (max-width: 660px) {
+    .layout { flex-direction: column; }
+    .panel-left { flex: 1 1 100%; }
+    .result-cards { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🌴 Calculadora de Férias</h1>
+  <p>Visualize seus dias de férias no calendário com destaque por cor</p>
+</div>
+
+<div class="layout">
+
+  <!-- ══ PAINEL ESQUERDO ══ -->
+  <div class="panel-left">
+
+    <div class="card">
+      <h2>Configurar período</h2>
+
+      <div class="field">
+        <label>Data de início das férias</label>
+        <input type="date" id="inicio">
+      </div>
+
+      <div class="field">
+        <label>Dias de férias disponíveis</label>
+        <input type="number" id="ferias" value="30" min="1" max="365">
+        <span class="hint">Total de dias que você tem direito</span>
+      </div>
+
+      <div class="field">
+        <label>Dias que você deve à empresa</label>
+        <input type="number" id="deve" value="0" min="0">
+        <span class="hint">Serão descontados do final das férias</span>
+      </div>
+
+      <button class="btn-calc" onclick="calcular()">Calcular e visualizar</button>
+    </div>
+
+    <!-- Resultados -->
+    <div class="card results-hidden" id="resultados-card">
+      <h2>Resumo</h2>
+      <div class="result-cards">
+        <div class="rcard sky">
+          <span class="rc-label">Início</span>
+          <span class="rc-value" id="r-inicio">—</span>
+          <span class="rc-sub">primeiro dia</span>
+        </div>
+        <div class="rcard green">
+          <span class="rc-label">Dias gozados</span>
+          <span class="rc-value" id="r-liquido">—</span>
+          <span class="rc-sub">dias em casa</span>
+        </div>
+        <div class="rcard orange">
+          <span class="rc-label">Dias devidos</span>
+          <span class="rc-value" id="r-deve">—</span>
+          <span class="rc-sub">descontados</span>
+        </div>
+        <div class="rcard indigo">
+          <span class="rc-label">Retorno</span>
+          <span class="rc-value" id="r-volta">—</span>
+          <span class="rc-sub">volta ao trabalho</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legenda -->
+    <div class="card">
+      <h2>Legenda</h2>
+      <div class="legend">
+        <div class="legend-item"><div class="dot" style="background:var(--start)"></div> Início das férias</div>
+        <div class="legend-item"><div class="dot" style="background:var(--vacation)"></div> Dias de férias gozados</div>
+        <div class="legend-item"><div class="dot" style="background:var(--owed)"></div> Dias devidos (descontados)</div>
+        <div class="legend-item"><div class="dot" style="background:var(--return)"></div> Dia de retorno ao trabalho</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ PAINEL DIREITO – CALENDÁRIOS ══ -->
+  <div class="panel-right">
+    <div class="card">
+      <div class="cal-nav">
+        <button onclick="mudarMes(-1)">&#8249;</button>
+        <span class="cal-title" id="cal-titulo"></span>
+        <button onclick="mudarMes(1)">&#8250;</button>
+      </div>
+      <div id="cal-container" class="calendar-wrap"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Estado global ──────────────────────────────────────────
+  let mesAtual = new Date();
+  mesAtual.setDate(1);
+
+  let vacStart  = null; // Date: primeiro dia
+  let vacEnd    = null; // Date: último dia gozado (inclusive)
+  let owedStart = null; // Date: primeiro dia devolvido
+  let owedEnd   = null; // Date: último dia devolvido (inclusive)
+  let retDay    = null; // Date: dia de retorno
+
+  const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                 'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+  // ── Utilitários ───────────────────────────────────────────
+  function toDate(str) {
+    // "YYYY-MM-DD" → Date sem fuso horário
+    const [y,m,d] = str.split('-').map(Number);
+    return new Date(y, m-1, d);
+  }
+  function addDays(date, n) {
+    const d = new Date(date);
+    d.setDate(d.getDate() + n);
+    return d;
+  }
+  function sameDay(a, b) {
+    return a.getFullYear()===b.getFullYear() &&
+           a.getMonth()===b.getMonth() &&
+           a.getDate()===b.getDate();
+  }
+  function fmt(d) {
+    return d.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', year:'numeric'});
+  }
+  function fmtShort(d) {
+    return d.toLocaleDateString('pt-BR', {day:'2-digit', month:'short'});
+  }
+
+  // ── Cálculo ───────────────────────────────────────────────
+  function calcular() {
+    const inicioVal = document.getElementById('inicio').value;
+    if (!inicioVal) { alert('Escolha a data de início.'); return; }
+
+    const diasFerias  = parseInt(document.getElementById('ferias').value) || 0;
+    const diasDevendo = parseInt(document.getElementById('deve').value)  || 0;
+
+    if (diasDevendo > diasFerias) {
+      alert('Os dias devidos não podem ser maiores que os dias de férias.');
+      return;
+    }
+    if (diasFerias < 1) { alert('Informe ao menos 1 dia de férias.'); return; }
+
+    vacStart  = toDate(inicioVal);
+    const diasGozados = diasFerias - diasDevendo;
+
+    // último dia em casa (inclusive)
+    vacEnd    = addDays(vacStart, diasGozados - 1);
+
+    // dias devidos começa logo após vacEnd
+    if (diasDevendo > 0) {
+      owedStart = addDays(vacStart, diasGozados);
+      owedEnd   = addDays(vacStart, diasFerias - 1);
+    } else {
+      owedStart = null;
+      owedEnd   = null;
+    }
+
+    // retorno = dia após owedEnd (ou dia após vacEnd se não há dias devidos)
+    retDay = addDays(vacStart, diasFerias);
+
+    // Preencher cards
+    document.getElementById('r-inicio').textContent = fmt(vacStart);
+    document.getElementById('r-liquido').textContent = diasGozados + ' dias';
+    document.getElementById('r-deve').textContent = diasDevendo > 0 ? diasDevendo + ' dias' : '0 dias';
+    document.getElementById('r-volta').textContent = fmt(retDay);
+    document.getElementById('resultados-card').classList.remove('results-hidden');
+
+    // Navegar para o mês de início
+    mesAtual = new Date(vacStart.getFullYear(), vacStart.getMonth(), 1);
+    renderCalendarios();
+  }
+
+  // ── Navegação de mês ──────────────────────────────────────
+  function mudarMes(delta) {
+    mesAtual.setMonth(mesAtual.getMonth() + delta);
+    renderCalendarios();
+  }
+
+  // ── Renderização ──────────────────────────────────────────
+  function getDayClass(date) {
+    if (!vacStart) return 'normal';
+
+    if (sameDay(date, vacStart)) return 'vac-start';
+    if (retDay && sameDay(date, retDay)) return 'return-day';
+
+    if (owedStart && owedEnd) {
+      if (date >= owedStart && date < owedEnd) return 'owed-mid';
+      if (sameDay(date, owedEnd)) return 'owed-end';
+    }
+
+    if (vacEnd && date > vacStart && date < vacEnd) return 'vac-mid';
+    if (vacEnd && sameDay(date, vacEnd)) return 'vac-end';
+
+    return 'normal';
+  }
+
+  function getDayTip(cls, date) {
+    if (cls === 'vac-start')  return 'Início das férias';
+    if (cls === 'vac-end')    return 'Último dia de férias';
+    if (cls === 'owed-end')   return 'Último dia descontado';
+    if (cls === 'return-day') return 'Volta ao trabalho';
+    return null;
+  }
+
+  function buildMonth(year, month) {
+    const wrap = document.createElement('div');
+
+    // grade
+    const grid = document.createElement('div');
+    grid.className = 'cal-grid';
+
+    // cabeçalho dias da semana
+    DIAS_SEMANA.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'cal-dow';
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+
+    // espaços vazios
+    for (let i = 0; i < firstDay; i++) {
+      const el = document.createElement('div');
+      el.className = 'cal-day empty';
+      grid.appendChild(el);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      const cls  = getDayClass(date);
+
+      const el = document.createElement('div');
+      el.className = 'cal-day ' + cls;
+      el.textContent = d;
+
+      if (sameDay(date, today)) el.classList.add('today');
+
+      const tip = getDayTip(cls, date);
+      if (tip) el.setAttribute('data-tip', tip);
+
+      grid.appendChild(el);
+    }
+
+    wrap.appendChild(grid);
+    return wrap;
+  }
+
+  function renderCalendarios() {
+    const container = document.getElementById('cal-container');
+    container.innerHTML = '';
+
+    // Quantos meses mostrar: se vacStart definido, mostra do mês do inicio até o mês do retorno (max 4)
+    let meses = [];
+    if (vacStart && retDay) {
+      let cur = new Date(mesAtual.getFullYear(), mesAtual.getMonth(), 1);
+      const limit = new Date(retDay.getFullYear(), retDay.getMonth(), 1);
+      while (cur <= limit && meses.length < 4) {
+        meses.push({ y: cur.getFullYear(), m: cur.getMonth() });
+        cur.setMonth(cur.getMonth() + 1);
+      }
+      if (meses.length === 0) meses.push({ y: mesAtual.getFullYear(), m: mesAtual.getMonth() });
+    } else {
+      meses = [{ y: mesAtual.getFullYear(), m: mesAtual.getMonth() }];
+    }
+
+    // Atualiza título com range
+    const primeiro = meses[0];
+    const ultimo   = meses[meses.length - 1];
+    const tituloEl = document.getElementById('cal-titulo');
+    if (meses.length === 1) {
+      tituloEl.textContent = MESES[primeiro.m] + ' ' + primeiro.y;
+    } else {
+      tituloEl.textContent =
+        MESES[primeiro.m].substring(0,3) + ' ' + primeiro.y +
+        ' — ' +
+        MESES[ultimo.m].substring(0,3) + ' ' + ultimo.y;
+    }
+
+    meses.forEach(({ y, m }) => {
+      // sub-título do mês (quando múltiplos meses)
+      if (meses.length > 1) {
+        const lbl = document.createElement('div');
+        lbl.style.cssText = 'font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;margin-top:8px;';
+        lbl.textContent = MESES[m] + ' ' + y;
+        container.appendChild(lbl);
+      }
+
+      const separator = document.createElement('div');
+      separator.style.cssText = 'background:var(--card2);border-radius:12px;padding:12px;margin-bottom:4px;';
+      separator.appendChild(buildMonth(y, m));
+      container.appendChild(separator);
+    });
+  }
+
+  // ── Init ─────────────────────────────────────────────────
+  // Pré-preenche data de hoje
+  const hoje = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('inicio').value =
+    hoje.getFullYear() + '-' + pad(hoje.getMonth()+1) + '-' + pad(hoje.getDate());
+
+  renderCalendarios();
+</script>
+
+</body>
+</html>
